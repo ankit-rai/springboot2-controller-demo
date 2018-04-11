@@ -1,0 +1,114 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="info">
+	<Properties>
+		<Property name="appLogFileName">demo-web-app</Property>
+		<Property name="reactorLogFileName">reactor-logs</Property>
+		<Property name="springLogFileName">spring-logs</Property>
+		<Property name="thirdPartyLogFileName">third-party</Property>
+		<Property name="kvLogFileName">kv-logs</Property>
+		
+		<!-- default value for log path -->
+		<Property name="baseLogPath">logs</Property>
+	</Properties>
+	<Appenders>
+		<Console name="CONSOLE_APPENDER" target="SYSTEM_OUT">
+			<PatternLayout pattern="%d{HH:mm:ss.SSS} [Thread: %t] %level %c#%M - %msg%n" />
+		</Console>
+
+		<RollingRandomAccessFile 
+				name="APP_LOG_APPENDER" 
+				fileName="${sys:baseLogPath}/${appLogFileName}.log"
+				filePattern="${sys:baseLogPath}/backups/$${date:yyyy-MM}/${appLogFileName}-%d{yyyy-MM-dd}-%i.log.gz" 
+				filePermissions="rw-r-----"
+				immediateFlush="true">
+			<PatternLayout>
+				<Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [Thread: %t] %level %c#%M - %msg%n</Pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+				<SizeBasedTriggeringPolicy size="100 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="20"/>
+		</RollingRandomAccessFile>
+		<RollingRandomAccessFile 
+				name="REACTOR_LOG_APPENDER" 
+				fileName="${sys:baseLogPath}/${reactorLogFileName}.log"
+				filePattern="${sys:baseLogPath}/backups/$${date:yyyy-MM}/${reactorLogFileName}-%d{yyyy-MM-dd}-%i.log.gz" 
+				filePermissions="rw-r-----"
+				immediateFlush="true">
+			<PatternLayout>
+				<Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [Thread: %t] %level %c#%M - %msg%n</Pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+				<SizeBasedTriggeringPolicy size="100 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="20"/>
+		</RollingRandomAccessFile>
+		<RollingRandomAccessFile 
+				name="SPRING_LOG_APPENDER" 
+				fileName="${sys:baseLogPath}/${springLogFileName}.log"
+				filePattern="${sys:baseLogPath}/backups/$${date:yyyy-MM}/${springLogFileName}-%d{yyyy-MM-dd}-%i.log.gz" 
+				filePermissions="rw-r-----"
+				immediateFlush="true">
+			<PatternLayout>
+				<Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [Thread: %t] %level %c#%M - %msg%n</Pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+				<SizeBasedTriggeringPolicy size="100 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="20"/>
+		</RollingRandomAccessFile>
+		<RollingRandomAccessFile 
+				name="THIRD_PARTY_LIBRARY_APPENDER" 
+				fileName="${sys:baseLogPath}/${thirdPartyLogFileName}.log"
+				filePattern="${sys:baseLogPath}/backups/$${date:yyyy-MM}/${thirdPartyLogFileName}-%d{yyyy-MM-dd}-%i.log.gz"
+				filePermissions="rw-r-----"
+				immediateFlush="true">
+			<PatternLayout>
+				<Pattern>%d{yyyy-MM-dd HH:mm:ss.SSS} [Thread: %t] %level %c#%M - %msg%n</Pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+				<SizeBasedTriggeringPolicy size="100 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="20"/>
+		</RollingRandomAccessFile>
+		<RollingRandomAccessFile 
+				name="KV_APPENDER" 
+				fileName="${sys:baseLogPath}/${kvLogFileName}.log"
+				filePattern="${sys:baseLogPath}/backups/$${date:yyyy-MM}/${kvLogFileName}-%d{yyyy-MM-dd}-%i.log.gz"
+				filePermissions="rw-r-----"
+				immediateFlush="true">
+			<PatternLayout>
+				<Pattern>%d{yyyy-MM-dd'T'HH:mm:ss,SSSZ} %m%n</Pattern>
+			</PatternLayout>
+			<Policies>
+				<TimeBasedTriggeringPolicy />
+				<SizeBasedTriggeringPolicy size="50 MB" />
+			</Policies>
+			<DefaultRolloverStrategy max="10"/>
+		</RollingRandomAccessFile>
+		
+	</Appenders>
+	
+	<Loggers>
+		<Logger name="com.demo" additivity="false" level="debug">
+			<AppenderRef ref="APP_LOG_APPENDER"/>
+		</Logger>
+		<Logger name="reactor" additivity="false" level="debug" >
+			<AppenderRef ref="REACTOR_LOG_APPENDER" />
+		</Logger>
+		<Logger name="org.springframework" additivity="false" level="debug" >
+			<AppenderRef ref="SPRING_LOG_APPENDER" />
+		</Logger>
+		<Logger name="KV_LOGGER" additivity="false" level="info" >
+			<AppenderRef ref="KV_APPENDER" />
+		</Logger>
+		<Root additivity="false" level="debug">
+			<AppenderRef ref="THIRD_PARTY_LIBRARY_APPENDER" />
+		</Root>
+		
+	</Loggers>
+</Configuration>
