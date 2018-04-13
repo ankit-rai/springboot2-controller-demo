@@ -1,5 +1,6 @@
 package com.demo.fn.route;
 
+import com.demo.fn.config.props.CouchbaseConfigProperties;
 import com.demo.fn.context.RequestTxContext;
 import com.demo.fn.service.UserService;
 import com.demo.util.logger.KeyValueLogger;
@@ -27,6 +28,9 @@ public class UserApiHandler {
     private static final Logger logger = LoggerFactory.getLogger(UserApiHandler.class);
     
     public static final String CLASS_NAME = UserApiHandler.class.getCanonicalName();
+    
+    @Autowired
+    private CouchbaseConfigProperties couchbaseConfigProperties;
 
     private final UserService userService;
     
@@ -36,6 +40,8 @@ public class UserApiHandler {
     }
 
     public Mono<ServerResponse> getById(final ServerRequest request) {
+        logger.info(">>>>>>>>>>>>> couchbaseConfigProperties: {}", couchbaseConfigProperties);
+        
         final String userId = request.pathVariables().get("id");
         
         // Shows how to use the logger consumer inside a Mono.subscriberContext() code.
