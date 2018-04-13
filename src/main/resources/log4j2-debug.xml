@@ -108,6 +108,7 @@
 		</Logger>
 		<Root additivity="false" level="debug">
 			<AppenderRef ref="THIRD_PARTY_LIBRARY_APPENDER" />
+			<AppenderRef ref="CONSOLE_APPENDER" />
 		</Root>
 		
 	</Loggers>

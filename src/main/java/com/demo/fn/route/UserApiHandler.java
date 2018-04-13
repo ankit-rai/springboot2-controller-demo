@@ -2,7 +2,8 @@ package com.demo.fn.route;
 
 import com.demo.fn.context.RequestTxContext;
 import com.demo.fn.service.UserService;
-import com.demo.fn.web.model.ResourceDetail;
+import com.demo.util.logger.KeyValueLogger;
+import com.demo.util.logger.LoggerUtilFunctions;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,32 +36,29 @@ public class UserApiHandler {
     }
 
     public Mono<ServerResponse> getById(final ServerRequest request) {
-        final ResourceDetail resourceDetail = (ResourceDetail) request.attribute("RESOURCE_DETAIL").orElse(null);
-        logger.info("ResourceDetail from request -> {}", resourceDetail);
-        
         final String userId = request.pathVariables().get("id");
+        
+        // Shows how to use the logger consumer inside a Mono.subscriberContext() code.
         return Mono.subscriberContext()
                 .flatMap(context -> {
+                    logger.info("[UserApiHandler#getById] Request Context --> {}", context);
+                    
                     final RequestTxContext requestTxContext = context.get(RequestTxContext.CLASS_NAME);
                     
-                    logger.info("[UserApiHandler#getById][TxId: {}] Fetching a user for given ID: '{}'", requestTxContext.getTxId(), userId);
-                    
                     return userService.getById(userId)
-                            .doOnSuccess(user -> logger.info("[TxId: {}] [UserApiHandler#getById] User with id '{}' was fetched successfully.", requestTxContext.getTxId(), userId));
-                    })
-                // If we want to pass additional context info to downstream layer
-                .subscriberContext(ctx -> ctx.put("HandlerClassName", CLASS_NAME))
-                .flatMap(user -> ServerResponse
-                        .ok()
-                        .contentType(MediaType.APPLICATION_JSON_UTF8)
-                        .body(BodyInserters.fromObject(user))
-                 )
-                ;
-
+                            .doOnEach(new KeyValueLogger(logger)
+                                        .addTxPath(LoggerUtilFunctions.FN_TX_PATH_BUILDER.apply(CLASS_NAME, "getById"))
+                                        .consumeLog())
+                            .flatMap(user -> ServerResponse
+                                    .ok()
+                                    .contentType(MediaType.APPLICATION_JSON_UTF8)
+                                    .header("X-Trace-Id", requestTxContext.getTxId())
+                                    .body(BodyInserters.fromObject(user)))
+                            ;
+                });
     }
 
     public Mono<ServerResponse> addUser(final ServerRequest request) {
-
         return Mono.empty();
     }
 }

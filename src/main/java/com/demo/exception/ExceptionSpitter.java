@@ -3,7 +3,7 @@ package com.demo.exception;
 import reactor.core.publisher.Mono;
 
 /**
- * A utility class to create an {@link PlatformException}
+ * A utility class to create an {@link AppException}
  * 
  * @author Niranjan Nanda
  */
@@ -17,20 +17,20 @@ public final class ExceptionSpitter {
 	}
 	
 	/**
-	 * Creates an {@link PlatformException} with {@link #DEFAULT_ERROR_CODE}
+	 * Creates an {@link AppException} with {@link #DEFAULT_ERROR_CODE}
 	 * and {@link #DEFAULT_ERROR_MESSAGE}.
 	 * 
 	 * @return	A new instance of {@code AppSupportException} with default code
 	 * and message.
 	 */
-	public static PlatformException spitDefault() {
-		return new PlatformException(DEFAULT_ERROR_CODE, DEFAULT_ERROR_MESSAGE);
+	public static AppException spitDefault() {
+		return new AppException(DEFAULT_ERROR_CODE, DEFAULT_ERROR_MESSAGE);
 	}
 	
 	/**
 	 * Creates an instance of internal builder class with the given 
 	 * {@code errorCode}. The obtained builder class provides fluent-style
-	 * chained methods to construct an {@link PlatformException}.
+	 * chained methods to construct an {@link AppException}.
 	 * 
 	 * @param errorCode	The error code which will be used to create {@code AppSupportException}.
 	 * @return	An instance of internal builder class.
@@ -45,7 +45,7 @@ public final class ExceptionSpitter {
 	
 	/**
 	 * The internal builder class which provides fluent style
-	 * chained methods to construct {@link PlatformException}.
+	 * chained methods to construct {@link AppException}.
 	 * 
 	 * @author Niranjan Nanda
 	 */
@@ -60,10 +60,10 @@ public final class ExceptionSpitter {
 		
 		/**
 		 * Collects the error message which will be used while
-		 * constructing {@link PlatformException}.
+		 * constructing {@link AppException}.
 		 * 
 		 * @param errorMessage	The error message that will be associated
-		 * with {@link PlatformException}.
+		 * with {@link AppException}.
 		 * @return	An existing instance of internal builder class.
 		 */
 		public Spitter withErrorMessage(final String errorMessage) {
@@ -72,10 +72,10 @@ public final class ExceptionSpitter {
 		}
 		
 		/**
-		 * Collects the cause which will be wrapped in {@link PlatformException}. 
+		 * Collects the cause which will be wrapped in {@link AppException}. 
 		 * 
 		 * @param cause	The {@link Throwable} which will be wrapped in 
-		 * {@link PlatformException}.
+		 * {@link AppException}.
 		 * @return	An existing instance of internal builder class.
 		 */
 		public Spitter withCause(final Throwable cause) {
@@ -84,19 +84,19 @@ public final class ExceptionSpitter {
 		}
 		
 		/**
-		 * Creates a new instance of {@link PlatformException}.
+		 * Creates a new instance of {@link AppException}.
 		 * 
 		 * @return	Newly created instance of {@code AppSupportException}.
 		 */
-		public PlatformException spit() {
-			return new PlatformException(
+		public AppException spit() {
+			return new AppException(
 					this.errorCode,
 					this.errorMessage,
 					cause);
 		}
 		
 		/**
-		 * Creates a {@link Mono} that will terminate with the {@link PlatformException}.
+		 * Creates a {@link Mono} that will terminate with the {@link AppException}.
 		 * This utility method is useful while working with {@code Mono} where an exception
 		 * should not be thrown, rather should be given to the subscriber through error 
 		 * channel.
@@ -124,10 +124,10 @@ public final class ExceptionSpitter {
 		}
 		
 		/**
-		 * Collects the cause which will be wrapped in {@link PlatformException}. 
+		 * Collects the cause which will be wrapped in {@link AppException}. 
 		 * 
 		 * @param cause	The {@link Throwable} which will be wrapped in 
-		 * {@link PlatformException}.
+		 * {@link AppException}.
 		 * @return	An existing instance of internal builder class.
 		 */
 		public ExceptionEnumSpitter withCause(final Throwable cause) {
@@ -135,7 +135,7 @@ public final class ExceptionSpitter {
 			return this;
 		}
 		
-		public PlatformException spit() {
+		public AppException spit() {
 			return new Spitter(this.exceptionEnum.exceptionCode())
 					.withErrorMessage(this.exceptionEnum.toFormattedExceptionMessage(this.messageArgs))
 					.withCause(this.cause)

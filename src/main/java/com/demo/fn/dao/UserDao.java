@@ -1,14 +1,12 @@
 package com.demo.fn.dao;
 
 import com.demo.exception.ExceptionSpitter;
-import com.demo.fn.context.RequestTxContext;
 import com.demo.fn.exception.ExceptionCodes;
 import com.demo.fn.exception.ExceptionMessages;
 import com.demo.fn.model.User;
 import com.demo.util.AppSupportFunctions;
 import com.demo.util.InMemoryKeyValueStore;
 import com.demo.util.logger.KeyValueLogger;
-import com.demo.util.logger.LoggerUtil;
 import com.demo.util.logger.LoggerUtilFunctions;
 
 import org.apache.commons.lang3.StringUtils;
@@ -68,7 +66,9 @@ public class UserDao {
 //		        .flatMap(context -> {
 //		            final RequestTxContext requestTxContext = context.get(RequestTxContext.CLASS_NAME);
 //		            logger.info("[UserDao#getById] Context: {}", context);
+	                
 //		            this.aSampleMethod()
+	                    // This is how you pass current context to a private method.
 //		                .subscriberContext(innerCtx -> innerCtx.put(RequestTxContext.CLASS_NAME, requestTxContext))
 //		                .block();
 //		            
@@ -80,20 +80,14 @@ public class UserDao {
 //	}
 	
 	public Mono<User> getById(final String id) {
-        return Mono.subscriberContext()
-                .flatMap(context -> {
-                    final RequestTxContext requestTxContext = context.get(RequestTxContext.CLASS_NAME);
-                    return fetchUser(id)
-                            .doOnEach(signal -> {
-                                logger.info("[UserDao#getById] Caught signal: {}", signal);
-                                LoggerUtil.log(
-                                        new KeyValueLogger(logger)
-                                            .addTxPath(LoggerUtilFunctions.FN_TX_PATH_BUILDER.apply(CLASS_NAME, "getById"))
-                                        );
-                            })
-                          ;
-                })
-            ;
+	    // Shows how to use log consumer. Signal object is passed automatically.
+	    return fetchUser(id)
+                .doOnEach(
+                    new KeyValueLogger(logger)
+                        .addTxPath(LoggerUtilFunctions.FN_TX_PATH_BUILDER.apply(CLASS_NAME, "getById"))
+                        .add("MethodArguments", "[" + id + "]")
+                        .consumeLog() 
+                );
     }
 	
 	private Mono<User> fetchUser(final String id) {
@@ -104,30 +98,23 @@ public class UserDao {
             return Mono.error(ExceptionSpitter.spitDefault());
         } 
 	    
-	    return Mono.subscriberContext()
-	        .flatMap(context -> {
-	            logger.info("[UserDao#fetchUser1] Context: {}", context);
-	            
-	            final User user = (User) kvStore.get(id);
-	            if (user == null) {
-	                return ExceptionSpitter
-	                    .forErrorCode(ExceptionCodes.REST_404001)
-	                    .withErrorMessage(AppSupportFunctions.FN_FORMAT_STRING.apply(ExceptionMessages.REST_404001, new String[] {id}))
-	                    .spitAsMono();
-	            }
-	            
-	            return Mono.just(user);
-	        })
-	        ;
-	    
+	    final User user = (User) kvStore.get(id);
+        if (user == null) {
+            return ExceptionSpitter
+                .forErrorCode(ExceptionCodes.REST_404001)
+                .withErrorMessage(AppSupportFunctions.FN_FORMAT_STRING.apply(ExceptionMessages.REST_404001, new String[] {id}))
+                .spitAsMono();
+        }
+        
+        return Mono.just(user);
 	}
 	
-	private Mono<Void> aSampleMethod() {
-	    return Mono.subscriberContext()
-            .flatMap(context -> {
-                logger.info("[UserDao#aSampleMethod] Context --> {}", context);
-                return Mono.empty();
-            })
-        ;
-	}
+//	private Mono<Void> aSampleMethod() {
+//	    return Mono.subscriberContext()
+//            .flatMap(context -> {
+//                logger.info("[UserDao#aSampleMethod] Context --> {}", context);
+//                return Mono.empty();
+//            })
+//        ;
+//	}
 }

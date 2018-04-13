@@ -7,14 +7,14 @@ package com.demo.exception;
  *
  * @author Niranjan Nanda
  */
-public class PlatformException extends RuntimeException {
+public class AppException extends RuntimeException {
 	// Serial version UID.
 	private static final long serialVersionUID = 1L;
 
 	private final String errorCode;
 	private final String errorMessage;
 
-	public PlatformException(
+	public AppException(
 			final String errorCode,
 			final String errorMessage) {
 		super(errorMessage);
@@ -22,7 +22,7 @@ public class PlatformException extends RuntimeException {
 		this.errorMessage = errorMessage;
 	}
 
-	public PlatformException(
+	public AppException(
 			final String errorCode,
 			final String errorMessage,
 			final Throwable cause) {
@@ -55,7 +55,7 @@ public class PlatformException extends RuntimeException {
 	@Override
 	public String toString() {
 		final StringBuilder builder = new StringBuilder();
-		builder.append("PlatformException: { ");
+		builder.append("AppException: { ");
 		builder.append(errorCode);
 		builder.append(": ");
 		builder.append(errorMessage);

@@ -1,0 +1,8 @@
+spring:
+  application:
+    name: Demo web app
+    
+logging:
+  level:
+    org.springframework.cloud.sleuth: DEBUG
+    com.demo: DEBUG

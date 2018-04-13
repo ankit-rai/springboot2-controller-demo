@@ -1,7 +1,7 @@
 package com.demo.fn.exception;
 
+import com.demo.exception.AppException;
 import com.demo.exception.ExceptionSpitter;
-import com.demo.exception.PlatformException;
 import com.demo.fn.util.WebConstants;
 import com.demo.fn.web.util.WebUtilsFunctions;
 import com.google.common.collect.Maps;
@@ -44,13 +44,13 @@ public class DemoErrorAttributes implements ErrorAttributes {
 	 */
 	@Override
 	public Map<String, Object> getErrorAttributes(final ServerRequest request, final boolean includeStackTrace) {
-		final PlatformException platformException = (PlatformException) getError(request);
+		final AppException appException = (AppException) getError(request);
 		
 		final Map<String, Object> errorAttributesMap = Maps.newLinkedHashMap();
-		errorAttributesMap.put(WebConstants.ERROR_CODE_KEY, platformException.getErrorCode());
+		errorAttributesMap.put(WebConstants.ERROR_CODE_KEY, appException.getErrorCode());
 		
-		// Get HttpStatus from PlatformException error code.
-		final int httpStatusCode = WebUtilsFunctions.FN_GET_HTTP_STATUS_CODE_FROM_ERROR_CODE.apply(platformException.getErrorCode());
+		// Get HttpStatus from appException error code.
+		final int httpStatusCode = WebUtilsFunctions.FN_GET_HTTP_STATUS_CODE_FROM_ERROR_CODE.apply(appException.getErrorCode());
 		final HttpStatus httpStatus = HttpStatus.resolve(httpStatusCode);
 		
 		// Store the HttpStatus in the map
@@ -59,8 +59,8 @@ public class DemoErrorAttributes implements ErrorAttributes {
 		// Populate "error"
 		errorAttributesMap.put(WebConstants.ERROR_REASON_PHRASE_KEY, httpStatus.getReasonPhrase());
 		
-		// Populate debug message from PlatformException
-		errorAttributesMap.put(WebConstants.DEBUG_MESSAGE_KEY, platformException.getErrorMessage());
+		// Populate debug message from appException
+		errorAttributesMap.put(WebConstants.DEBUG_MESSAGE_KEY, appException.getErrorMessage());
 		
 		return errorAttributesMap;
 	}
@@ -79,14 +79,14 @@ public class DemoErrorAttributes implements ErrorAttributes {
 	 */
 	@Override
 	public void storeErrorInformation(final Throwable error, final ServerWebExchange exchange) {
-		PlatformException exceptionToStore = null;
+		AppException exceptionToStore = null;
 		
 		if (error == null) {
 			exceptionToStore = ExceptionSpitter.spitDefault();
-		} else if (error instanceof PlatformException) {
-			exceptionToStore = (PlatformException) error;
-		} else if (error.getCause() != null && error.getCause() instanceof PlatformException) {
-			exceptionToStore = (PlatformException) error.getCause();
+		} else if (error instanceof AppException) {
+			exceptionToStore = (AppException) error;
+		} else if (error.getCause() != null && error.getCause() instanceof AppException) {
+			exceptionToStore = (AppException) error.getCause();
 		} else {
 			exceptionToStore = ExceptionSpitter.spitDefault();
 		}

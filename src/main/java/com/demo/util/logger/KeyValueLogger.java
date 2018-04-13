@@ -1,17 +1,21 @@
 package com.demo.util.logger;
 
+import com.demo.fn.context.RequestTxContext;
 import com.demo.util.StreamUtil;
 
 import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
+import java.util.function.Consumer;
 
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.slf4j.spi.LocationAwareLogger;
 
+import reactor.core.publisher.Signal;
+import reactor.util.context.Context;
 import reactor.util.function.Tuple2;
 import reactor.util.function.Tuples;
 
@@ -25,9 +29,7 @@ public final class KeyValueLogger {
 	private final Map<String, Object> kvData;
 	private final Logger targetClazzLogger;
 	
-	
     private static final Logger KV_LOGGER = LoggerFactory.getLogger("KV_LOGGER");
-	
 	
 	public KeyValueLogger(final Logger targetClazzLogger) {
 		this.kvData = new LinkedHashMap<>();
@@ -90,29 +92,29 @@ public final class KeyValueLogger {
 		logInternal(LocationAwareLogger.ERROR_INT);
 	}
 	
-//	public <T> Consumer<Signal<T>> log() {
-//	    return signal -> {
-//	        this.targetClassLogger().info("[KeyValueLogger#log] Caught Signal --> {}", signal);
-//	        if (!(signal.isOnNext() || signal.isOnError())) {
-//	            return;
-//	        }
-//	        
-//	        if (signal.hasError()) {
-//	            this.addException(signal.getThrowable());
-//	            this.addTxStatus(TxStatus.FAILURE);
-//	        } else {
-//	            this.addTxStatus(TxStatus.SUCCESS);
-//	        }
-//
-//	        final Context context = signal.getContext();
-//
-//	        this.targetClassLogger().info("[KeyValueLogger#log] Context inside kv logger consumer --> {}", context);
-//
-//	        final RequestTxContext requestTxContext = context.get(RequestTxContext.CLASS_NAME);
-//	        this.addTxId(requestTxContext.getTxId());
-//	        this.logInternal(LocationAwareLogger.INFO_INT);
-//	    };
-//	}
+	public <T> Consumer<Signal<T>> consumeLog() {
+	    return signal -> {
+	        this.targetClassLogger().info("[KeyValueLogger#log] Caught Signal --> {}", signal);
+	        if (!(signal.isOnNext() || signal.isOnError())) {
+	            return;
+	        }
+	        
+	        if (signal.hasError()) {
+	            this.addException(signal.getThrowable());
+	            this.addTxStatus(TxStatus.FAILURE);
+	        } else {
+	            this.addTxStatus(TxStatus.SUCCESS);
+	        }
+
+	        final Context context = signal.getContext();
+
+	        this.targetClassLogger().info("[KeyValueLogger#log] Context inside kv logger consumer --> {}", context);
+
+	        final RequestTxContext requestTxContext = context.get(RequestTxContext.CLASS_NAME);
+	        this.addTxId(requestTxContext.getTxId());
+	        this.logInternal(LocationAwareLogger.INFO_INT);
+	    };
+	}
 	
 	public Map<String, Object> dataMap() {
 	    return Collections.unmodifiableMap(kvData);
@@ -128,6 +130,18 @@ public final class KeyValueLogger {
 	    if (!this.kvData.containsKey(LoggerConstants.TX_ID_KEY)) {
 	        throw new IllegalArgumentException("TxID is required to log a message.");
 	    }
+	    
+	    // Print the txId before anything else
+	    messageBuilder
+            .append(LoggerConstants.TX_ID_KEY)
+            .append(LoggerConstants.EQUALS)
+            .append(LoggerConstants.DOUBLE_QUOTE)
+            .append(kvData.get(LoggerConstants.TX_ID_KEY))
+            .append(LoggerConstants.DOUBLE_QUOTE)
+            .append(LoggerConstants.SPACE);
+	    
+	    // Remove TxId from the map
+	    kvData.remove(LoggerConstants.TX_ID_KEY);
 	    
 		StreamUtil.asStreamOfEntries(this.kvData, false)
 			.filter(entry -> Objects.nonNull(entry) && StringUtils.isNotBlank(entry.getKey()))

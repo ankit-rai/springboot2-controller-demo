@@ -1,7 +1,7 @@
 package com.demo.fn.web.filter;
 
 import com.demo.exception.ExceptionSpitter;
-import com.demo.exception.PlatformException;
+import com.demo.exception.AppException;
 import com.demo.fn.context.RequestTxContext;
 import com.demo.fn.web.util.WebUtilsFunctions;
 
@@ -41,8 +41,8 @@ public class ResourceParsingFilter implements HandlerFilterFunction<ServerRespon
                 return WebUtilsFunctions.FN_GET_RESOURCE_DETAIL_FROM_PATH.apply(requestPath)
                         .doOnError(t -> {
                             logger.error("[ResourceParsingFilter#filter][TxId: {}] Exception while extracting resource detail from request path '{}'...\n", requestTxContext.getTxId(), requestPath, t);
-                            if (t instanceof PlatformException) {
-                                throw (PlatformException) t;
+                            if (t instanceof AppException) {
+                                throw (AppException) t;
                             } else {
                                 throw ExceptionSpitter.spitDefault();
                             }

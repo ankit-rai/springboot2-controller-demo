@@ -64,7 +64,7 @@ public class GlobalExceptionHandler extends AbstractErrorWebExceptionHandler {
 		
 		return ServerResponse.status(httpStatus)
 				.contentType(MediaType.APPLICATION_JSON_UTF8)
-				.header("X-TraceId", requestTxContext == null ? "No-TxId" : requestTxContext.getTxId())
+				.header("X-TraceId", requestTxContext == null ? "No-Trace-Id" : requestTxContext.getTxId())
 				.body(BodyInserters.fromObject(errorPropertiesMap));
 	}
 }

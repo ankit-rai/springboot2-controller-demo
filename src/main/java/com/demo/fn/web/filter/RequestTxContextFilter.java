@@ -1,6 +1,7 @@
 package com.demo.fn.web.filter;
 
 import com.demo.fn.context.RequestTxContext;
+import com.demo.fn.web.util.WebUtilsFunctions;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -26,7 +27,10 @@ public class RequestTxContextFilter implements HandlerFilterFunction<ServerRespo
      */
     @Override
     public Mono<ServerResponse> filter(ServerRequest request, HandlerFunction<ServerResponse> next) {
-        final RequestTxContext requestTxContext = new RequestTxContext();
+        // Look for a header X-Trace-Id. If available, use the ID sent in this header; else generate a new ID.
+        final RequestTxContext requestTxContext =  WebUtilsFunctions.GET_FIRST_HEADER_VALUE.apply(request, "X-Trace-Id")
+                .map(RequestTxContext::new)
+                .orElse(new RequestTxContext());
         
         logger.info("[RequestTxContextFilter was called] A request tx context was set: '{}'", requestTxContext);
         
@@ -34,6 +38,12 @@ public class RequestTxContextFilter implements HandlerFilterFunction<ServerRespo
         request.attributes().put(RequestTxContext.CLASS_NAME, requestTxContext);
         
         return next.handle(request)
+//                .map(serverResponse -> {
+//                    return ServerResponse.from(serverResponse)
+//                            .header("X-Trace-Id", requestTxContext.getTxId())
+//                            .build();
+//                })
+//                .flatMap(Function.identity())
                 .subscriberContext(context -> Context.of(RequestTxContext.CLASS_NAME, requestTxContext));
     }
     

@@ -13,7 +13,12 @@ server:
   port: 5002
   
 logging:
-  config: classpath:log4j2-debug.xml  
+  config: classpath:log4j2-debug.xml
+  level:
+    org:
+      springframework:
+        cloud:
+          sleuth: DEBUG
 
 # Actuator endpoint management
 management:

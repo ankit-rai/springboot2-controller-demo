@@ -7,6 +7,8 @@ import com.demo.fn.exception.ExceptionMessages;
 import com.demo.fn.web.model.ResourceDetail;
 import com.demo.fn.web.util.WebUtilsFunctions;
 import com.demo.util.AppSupportFunctions;
+import com.demo.util.logger.KeyValueLogger;
+import com.demo.util.logger.LoggerUtilFunctions;
 
 import java.util.concurrent.atomic.AtomicReference;
 
@@ -53,7 +55,16 @@ public class AuthenticationFilter implements HandlerFilterFunction<ServerRespons
 		            .flatMap(this::validateToken)
 		            .switchIfEmpty(Mono.defer(() -> this.validateOTT(tokenHolder.get())))
 		            .switchIfEmpty(Mono.defer(this::raiseException))
-		            .doOnSuccess(isTokenValid -> logger.info("Authentication successful."))
+		            .doOnEach(signal -> 
+                        new KeyValueLogger(logger)
+                            .addTxPath(LoggerUtilFunctions.FN_TX_PATH_BUILDER.apply(CLASS_NAME, "filter"))
+                            .add("Message", 
+                                    signal.hasError() 
+                                        ? "Authentication failed."
+                                        : "Authentication successful."
+                             )
+                            .<Boolean>consumeLog()
+                            .accept(signal))
 		        ;
 		    })
 		    
@@ -64,9 +75,7 @@ public class AuthenticationFilter implements HandlerFilterFunction<ServerRespons
 	private Mono<Boolean> validateToken(final String token) {
 	    if (StringUtils.startsWith(token, "abc")) {
 	        return Mono.just(Boolean.TRUE);
-	    } else if (StringUtils.startsWith(token, "xyz")) {
-            return Mono.just(Boolean.FALSE);
-        }
+	    } 
 	    
         return Mono.empty();
     }
@@ -74,9 +83,7 @@ public class AuthenticationFilter implements HandlerFilterFunction<ServerRespons
     private Mono<Boolean> validateOTT(final String token) {
         if (StringUtils.startsWith(token, "ott")) {
             return Mono.just(Boolean.TRUE);
-        } else if (StringUtils.startsWith(token, "xott")) {
-            return Mono.just(Boolean.FALSE);
-        }
+        } 
         
         return Mono.empty();
     }
