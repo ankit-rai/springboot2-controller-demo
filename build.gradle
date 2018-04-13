@@ -119,32 +119,8 @@ def getImplementationDate() {
 	return dateFormat.format(new java.util.Date())
 }
 
-// =============== Unit Testing ================
-// Test Settings
-tasks.withType(Test) {
-    reports.html.enabled = true
-    ext.useDefaultListeners = true
-    ext.workingDirectory = 'build/'
-    
-    systemProperty "spring.config.name", 'application-test'
-	systemProperty "Log4jContextSelector", 'org.apache.logging.log4j.core.async.AsyncLoggerContextSelector'
+springBoot {
+	mainClassName = 'com.demo.fn.DemoApplication' 
 }
 
-task httpHeaderFilterTests(type: Test) { 
-	useTestNG {
-		includeGroups 'httpHeaderFilterTests'
-	}
-}
 
-task resourceParsingFilterTests(type: Test, dependsOn: httpHeaderFilterTests) { 
-	useTestNG {
-		includeGroups 'resourceParsingFilterTests'
-	}
-}
-
-task testReport(type: TestReport) {
-	destinationDir = file("$buildDir/reports/all-tests")
-	reportOn httpHeaderFilterTests, resourceParsingFilterTests
-}
-
-test.dependsOn resourceParsingFilterTests, testReport
