@@ -38,12 +38,9 @@ public class RequestTxContextFilter implements HandlerFilterFunction<ServerRespo
         request.attributes().put(RequestTxContext.CLASS_NAME, requestTxContext);
         
         return next.handle(request)
-//                .map(serverResponse -> {
-//                    return ServerResponse.from(serverResponse)
-//                            .header("X-Trace-Id", requestTxContext.getTxId())
-//                            .build();
-//                })
-//                .flatMap(Function.identity())
+                .flatMap(serverResponse -> ServerResponse.from(serverResponse)
+                        .header("someCommonHeader", "commonValue")
+                        .build())
                 .subscriberContext(context -> Context.of(RequestTxContext.CLASS_NAME, requestTxContext));
     }
     
