@@ -44,27 +44,52 @@ public class GlobalExceptionHandler extends AbstractErrorWebExceptionHandler {
 		return RouterFunctions.route(RequestPredicates.all(), this::renderErrorResponse);
 	}
 	
-	/**
-	 * Render the error information as a JSON payload.
-	 * @param request the current request
-	 * @return a {@code Publisher} of the HTTP response
-	 */
 	private Mono<ServerResponse> renderErrorResponse(final ServerRequest request) {
-		final Map<String, Object> errorPropertiesMap = getErrorAttributes(request, false);
-		
-		final HttpStatus httpStatus = (HttpStatus) errorPropertiesMap.get(WebConstants.HTTP_STATUS_KEY);
-		
-		// Remove the HttpStatus from the map so that it does not get rendered in the response 
-		errorPropertiesMap.remove(WebConstants.HTTP_STATUS_KEY);
-		
-		// Store request context in the map
-        logger.info("RequestContext from Server Request --> {}", request.attribute(RequestTxContext.CLASS_NAME));
-        
-        final RequestTxContext requestTxContext = (RequestTxContext) request.attribute(RequestTxContext.CLASS_NAME).orElse(null);
-		
-		return ServerResponse.status(httpStatus)
-				.contentType(MediaType.APPLICATION_JSON_UTF8)
-				.header("X-TraceId", requestTxContext == null ? "No-Trace-Id" : requestTxContext.getTxId())
-				.body(BodyInserters.fromObject(errorPropertiesMap));
+	    return Mono.subscriberContext()
+	            .flatMap(context -> {
+	                logger.info("[Inside GlobalExceptionHandler] Mono Subscriber Context -> {}", context);
+	                
+	                final Map<String, Object> errorPropertiesMap = getErrorAttributes(request, false);
+	                
+	                final HttpStatus httpStatus = (HttpStatus) errorPropertiesMap.get(WebConstants.HTTP_STATUS_KEY);
+	                
+	                // Remove the HttpStatus from the map so that it does not get rendered in the response 
+	                errorPropertiesMap.remove(WebConstants.HTTP_STATUS_KEY);
+	                
+	                // Store request context in the map
+	                logger.info("RequestContext from Server Request --> {}", request.attribute(RequestTxContext.CLASS_NAME));
+	                
+	                final RequestTxContext requestTxContext = (RequestTxContext) request.attribute(RequestTxContext.CLASS_NAME).orElse(null);
+	                
+	                return ServerResponse.status(httpStatus)
+	                        .contentType(MediaType.APPLICATION_JSON_UTF8)
+	                        .header("X-TraceId", requestTxContext == null ? "No-Trace-Id" : requestTxContext.getTxId())
+	                        .body(BodyInserters.fromObject(errorPropertiesMap));
+	                })
+	            ;
 	}
+	
+//	/**
+//	 * Render the error information as a JSON payload.
+//	 * @param request the current request
+//	 * @return a {@code Publisher} of the HTTP response
+//	 */
+//	private Mono<ServerResponse> renderErrorResponse(final ServerRequest request) {
+//		final Map<String, Object> errorPropertiesMap = getErrorAttributes(request, false);
+//		
+//		final HttpStatus httpStatus = (HttpStatus) errorPropertiesMap.get(WebConstants.HTTP_STATUS_KEY);
+//		
+//		// Remove the HttpStatus from the map so that it does not get rendered in the response 
+//		errorPropertiesMap.remove(WebConstants.HTTP_STATUS_KEY);
+//		
+//		// Store request context in the map
+//        logger.info("RequestContext from Server Request --> {}", request.attribute(RequestTxContext.CLASS_NAME));
+//        
+//        final RequestTxContext requestTxContext = (RequestTxContext) request.attribute(RequestTxContext.CLASS_NAME).orElse(null);
+//		
+//		return ServerResponse.status(httpStatus)
+//				.contentType(MediaType.APPLICATION_JSON_UTF8)
+//				.header("X-TraceId", requestTxContext == null ? "No-Trace-Id" : requestTxContext.getTxId())
+//				.body(BodyInserters.fromObject(errorPropertiesMap));
+//	}
 }

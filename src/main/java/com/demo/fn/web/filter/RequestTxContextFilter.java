@@ -38,9 +38,6 @@ public class RequestTxContextFilter implements HandlerFilterFunction<ServerRespo
         request.attributes().put(RequestTxContext.CLASS_NAME, requestTxContext);
         
         return next.handle(request)
-                .flatMap(serverResponse -> ServerResponse.from(serverResponse)
-                        .header("someCommonHeader", "commonValue")
-                        .build())
                 .subscriberContext(context -> Context.of(RequestTxContext.CLASS_NAME, requestTxContext));
     }
     
