@@ -2,6 +2,8 @@ package com.demo.fn.route;
 
 import com.demo.fn.web.filter.*;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -18,6 +20,8 @@ import org.springframework.web.reactive.function.server.*;
 @Configuration
 @EnableWebFlux
 public class RouterConfigs {
+    
+    private static final Logger logger = LoggerFactory.getLogger(RouterConfigs.class);
 	
 	@Autowired
 	private UserApiHandler userApiHandler;
@@ -74,6 +78,7 @@ public class RouterConfigs {
 	}
 	
 	private RequestPredicate getByIdPredicate() {
+	    logger.info("getByIdPredicate called....");
 		return RequestPredicates.GET("/*/{id}").and(RequestPredicates.accept(MediaType.APPLICATION_JSON_UTF8))
 				;
 	}

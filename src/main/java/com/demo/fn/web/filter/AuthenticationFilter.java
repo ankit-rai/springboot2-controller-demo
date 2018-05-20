@@ -25,7 +25,7 @@ import reactor.core.publisher.Mono;
 
 /**
  * A filter which checks for <strong>{@code Authentication}</strong> HTTP header
- * and validates the content using A3 mechanism.
+ * and validates the content.
  *
  * @author Niranjan Nanda
  */
@@ -50,7 +50,7 @@ public class AuthenticationFilter implements HandlerFilterFunction<ServerRespons
 		        logger.debug("[AuthenticationFilter#filter][TxId: {}] Resource Detail -> {}", requestTxContext.getTxId(), resourceDetail);
 		        
 		        final AtomicReference<String> tokenHolder = new AtomicReference<>();
-		        return this.extractA3TokenFromHttpRequest(request)
+		        return this.extractAuthTokenFromHttpRequest(request)
 		            .doOnNext(tokenHolder::set)
 		            .flatMap(this::validateToken)
 		            .switchIfEmpty(Mono.defer(() -> this.validateOTT(tokenHolder.get())))
@@ -88,7 +88,7 @@ public class AuthenticationFilter implements HandlerFilterFunction<ServerRespons
         return Mono.empty();
     }
     
-    private Mono<String> extractA3TokenFromHttpRequest(final ServerRequest request) {
+    private Mono<String> extractAuthTokenFromHttpRequest(final ServerRequest request) {
         return Mono.justOrEmpty(WebUtilsFunctions.GET_FIRST_HEADER_VALUE
                 .apply(request, HttpHeaders.AUTHORIZATION)
                 .filter(StringUtils::isNotBlank)
