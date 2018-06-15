@@ -3,8 +3,7 @@ package com.demo.util.logger;
 import org.apache.commons.lang3.StringUtils;
 
 /**
- * An enum which provides status for transactions within the platform 
- * and other components.
+ * An enum which provides status for transactions
  *
  * @author Niranjan Nanda
  */
