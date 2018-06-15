@@ -43,4 +43,9 @@ public class WebConfig  {
 	public RequestTxContextFilter requestContextFilter() {
 	    return new RequestTxContextFilter();
 	}
+	
+	@Bean
+	public CustomTracingHeaderFilter traceHeaderFilter() {
+	    return new CustomTracingHeaderFilter();
+	}
 }

@@ -1,6 +1,6 @@
 buildscript {
 	ext {
-		spring_boot_version = '2.0.0.RELEASE'
+		spring_boot_version = '2.0.3.RELEASE'
 	}
 	repositories {
 		mavenCentral()
@@ -32,6 +32,7 @@ repositories {
 	mavenLocal()
 	mavenCentral()
 	maven { url "https://repo.spring.io/milestone" }
+	maven { url "https://repo.spring.io/snapshot" }
 }
 
 configurations {
@@ -64,6 +65,16 @@ ext {
 	
 	// For unit testing
 	testng_version = "6.14.2"
+	
+	spring_cloud_release_train_version = "Finchley.BUILD-SNAPSHOT"
+	//brave_release_train_version = "4.19.2"
+}
+
+dependencyManagement {
+	imports {
+		//mavenBom "io.zipkin.brave:brave-bom:${brave_release_train_version}"
+        mavenBom "org.springframework.cloud:spring-cloud-dependencies:${spring_cloud_release_train_version}"
+    }
 }
 
 dependencies {
@@ -73,7 +84,8 @@ dependencies {
 	compile "org.springframework.boot:spring-boot-starter-webflux"
 	compile "org.springframework.boot:spring-boot-starter-hateoas"
 	compile "org.springframework.boot:spring-boot-starter-log4j2"
-	compile "org.springframework.cloud:spring-cloud-starter-sleuth:2.0.0.M9"
+	compile "org.springframework.cloud:spring-cloud-starter-sleuth"
+	compile "org.springframework.cloud:spring-cloud-starter-zipkin"
 	
 	//compileOnly "org.springframework.boot:spring-boot-configuration-processor"
 	

@@ -58,7 +58,7 @@ public class UserApiHandler {
                             .flatMap(user -> ServerResponse
                                     .ok()
                                     .contentType(MediaType.APPLICATION_JSON_UTF8)
-                                    .header("X-Trace-Id", requestTxContext.getTxId())
+//                                    .header("X-Trace-Id", requestTxContext.getTxId())
                                     .body(BodyInserters.fromObject(user)))
                             ;
                 });
